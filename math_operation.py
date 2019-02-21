@@ -1,3 +1,6 @@
+import math
+
+
 def get_aver_and_error(data):
     summ = 0
     for i in data:
@@ -7,14 +10,24 @@ def get_aver_and_error(data):
     max_data = float(data[-1])
     error_data = abs(average_sour - max_data)
     print('Массив %s, максимальное = %s' % (data, max_data))
-    print('Среднее значение = %s mm +- %s mm,' %(average_sour, error_data) )
+    print('Среднее значение = %s mm +- %s mm,' % (average_sour, error_data))
     print('Число перевод в вольты %s' % transfer)
     average_in_volt = average_sour * transfer
     persent = (error_data / average_sour) * 100
     return average_in_volt, persent
 
+
+def get_error(errors_list):
+    summ = 0
+
+    for error in errors_list:
+        summ += error * error
+
+    return math.sqrt(summ)
+
 transfer = None
 obs = None
+
 while 1:
     print('Изменить шкалу?')
     data = input()
@@ -33,24 +46,23 @@ while 1:
     amp_data, sys_data = data.split(',')
     sour_list = amp_data.split()
     sys_list = sys_data.split()
-	
 
     sour_aver, sour_persent = get_aver_and_error(sour_list)
     print('Среднее значение источника = %s Вольт, Процент = %s\n' % (sour_aver, sour_persent))
     print('\n')
-	
+
     for num, value in enumerate(sys_list):
         sys_list[num] = (float(value) * transfer) + float(begin)
-	
-    sys_aver = sum(sys_list) / len(sys_list)
-    print('Среднее значение шума = %s Вольт, Процент = %s\n' % (sys_aver, 0))
+
+    sys_aver, sys_persent = get_aver_and_error(sys_list)
+    print('Среднее значение шума = %s Вольт, Процент = %s\n' % (sys_aver, sys_persent))
     print('\n')
-	
+
     if obs not in ['L', 'P', 'K', 'C']:  # (18cm, 92cm, 1.35, 6)
         raise Exception('Unknown observation')
     nul = {'K': 0.527, 'C': 0.378, 'L': 0, 'P': 0}
     sys = float(sys_aver) - nul[obs]
-	
+
     print('sys = (%s - %s) = %s\n' % (sys_aver, nul[obs], sys))
-    print('sys / sour = %s +- %s / %s +- %s = %s +- %s' % (sys, 0, sour_aver, sour_persent, sys/sour_aver, sour_persent))
+    print('sys / sour = %s +- %s / %s +- %s = %s +- %s' % (sys, 0, sour_aver, sour_persent, sys/sour_aver, get_error([sour_persent, sys_persent])))
     print('-------------------------------------------\n')
