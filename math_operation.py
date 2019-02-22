@@ -2,20 +2,24 @@ import math
 
 
 def get_aver_and_error(data):
-    summ = 0
-    for i in data:
-        summ = summ + float(i)
-    average_sour = summ / len(data)
+    average_sour = get_average(data)
     data.sort()
     max_data = float(data[-1])
     error_data = abs(average_sour - max_data)
     print('Массив %s, максимальное = %s' % (data, max_data))
     print('Среднее значение = %s mm +- %s mm,' % (average_sour, error_data))
     print('Число перевод в вольты %s' % transfer)
-    average_in_volt = average_sour * transfer
     persent = (error_data / average_sour) * 100
-    return average_in_volt, persent
+    return average_sour, persent
 
+def get_average(data):
+    summ = 0
+    for i in data:
+	    summ += float(i)
+    return summ / len(data)
+
+def translate_in_volt(value, transfer):
+    return value * transfer    
 
 def get_error(errors_list):
     summ = 0
@@ -48,6 +52,7 @@ while 1:
     sys_list = sys_data.split()
 
     sour_aver, sour_persent = get_aver_and_error(sour_list)
+    sour_aver = translate_in_volt(sour_aver, transfer)
     print('Среднее значение источника = %s Вольт, Процент = %s\n' % (sour_aver, sour_persent))
     print('\n')
 
